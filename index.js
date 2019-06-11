@@ -75,7 +75,7 @@ bot.on('callback_query', function (msg) {
 
   bot.answerCallbackQuery(msg.id, 'Вы выбрали: ' + msg.data, true);
   newQuestion(msg);
-});,
+});
 
 
 
