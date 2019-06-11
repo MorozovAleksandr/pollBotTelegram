@@ -8,9 +8,12 @@ var token = '842396489:AAFpo0eafA4SEtJ7hv4ECqwzCY0eH2N4FRM';
 // Включить опрос сервера
 var bot = new TelegramBot(token, { polling: true });
 
+var countRightAnswer = 0;
+var numberAnswer = 0;
+
 var questions = [
   {
-    title: 'Сколько параметров можно передать функции ?',
+    title: 'Первый вопрос. Сколько параметров можно передать функции ?',
     buttons: [
       [{ text: 'Ровно столько, сколько указано в определении функции.', callback_data: '0_1' }],
       [{ text: 'Сколько указано в определении функции или меньше.', callback_data: '0_2' }],
@@ -20,7 +23,7 @@ var questions = [
     right_answer: 4
   },
   {
-    title: 'Чему равна переменная name?\nvar name = "пупкин".replace("п", "д")',
+    title: 'Второй вопрос. Чему равна переменная name?\nvar name = "пупкин".replace("п", "д")',
     buttons: [
       [{ text: 'дудкин', callback_data: '1_1' }],
       [{ text: 'дупкин', callback_data: '1_2' }],
@@ -30,7 +33,7 @@ var questions = [
     right_answer: 2
   },
   {
-    title: 'Чему равно 0 || "" || 2 || true ?',
+    title: 'Третий вопрос. Чему равно 0 || "" || 2 || true ?',
     buttons: [
       [{ text: '0', callback_data: '2_1' }],
       [{ text: '""', callback_data: '2_2' }],
@@ -41,12 +44,8 @@ var questions = [
   },
 ];
 
-function getRandomQuestion() {
-  return questions[Math.floor(Math.random() * questions.length)];
-}
-
 function newQuestion(msg) {
-  var arr = getRandomQuestion();
+  var arr = questions[numberAnswer];
   var text = arr.title;
   var options = {
     reply_markup: JSON.stringify({
@@ -56,9 +55,14 @@ function newQuestion(msg) {
   };
   chat = msg.hasOwnProperty('chat') ? msg.chat.id : msg.from.id;
   bot.sendMessage(chat, text, options);
+  if (numberAnswer < questions.length) {
+    numberAnswer++;
+  }
 }
 
-bot.onText(/\/start_test/, function (msg, match) {
+bot.onText(/\/start/, function (msg, match) {
+  numberAnswer = 0;
+  countRightAnswer = 0;
   newQuestion(msg);
 });
 
@@ -68,44 +72,19 @@ bot.on('callback_query', function (msg) {
   var button = answer[1];
 
   if (questions[index].right_answer == button) {
-    bot.sendMessage(msg.from.id, 'Ответ верный ✅');
-  } else {
-    bot.sendMessage(msg.from.id, 'Ответ неверный ❌');
+    countRightAnswer++;
   }
 
-  bot.answerCallbackQuery(msg.id, 'Вы выбрали: ' + msg.data, true);
+  if (numberAnswer === questions.length) {
+    endPoll(msg);
+  }
   newQuestion(msg);
 });
 
-
-
-/* const Telegraf = require('telegraf')
-const { Composer } = Telegraf
-const bot = new Telegraf('842396489:AAFpo0eafA4SEtJ7hv4ECqwzCY0eH2N4FRM')
-var chatId;
-
-bot.start((ctx) => {
-  chatId = ctx.chat.id;
-  ctx.reply('Привет, давай я задам тебе пару вопросов:)');
-  bot.telegram.sendMessage(chatId, 'Сообщение номер два', options);
-  bot.telegram.sendMessage(chatId, 'Сделайте свой выбор: ', {
-    reply_markup: JSON.stringify({
-      inline_keyboard: [
-        [{ text: 'Кнопка 1', callback_data: '1' }],
-        [{ text: 'Кнопка 2', callback_data: '2' }],
-        [{ text: 'Кнопка 3', callback_data: '3' }]
-      ]
-    })
-  });
-  bot.on('callback_query', function (ctx) {
-    bot.telegram.sendMessage(ctx.from.id, ctx.data);
-  });
-})
-
-bot.on('text', (ctx) => {
-  if (ctx.message.text == 'да') {
-    ctx.reply('Окей, продолжим.');
+function endPoll(msg) {
+  if (countRightAnswer >= 2) {
+    bot.sendMessage(msg.from.id, "Отлично, вы прошли тест! Перейдите по ссылке123:  vk.com");
+  } else {
+    bot.sendMessage(msg.from.id, "К сожалению вы нам не подходите, попробуйте в другой раз.")
   }
-});
-
-bot.launch() */
+}
