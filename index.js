@@ -3,7 +3,7 @@ process.env.NTBA_FIX_319 = 1
 var TelegramBot = require('node-telegram-bot-api');
 
 // Устанавливаем токен, который выдавал нам бот.
-var token = '842396489:AAFpo0eafA4SEtJ7hv4ECqwzCY0eH2N4FRM';
+var token = '893848783:AAHAgAwkPcLsrQdyeneWnsbAD6Twhu_X9O8';
 
 // Включить опрос сервера
 var bot = new TelegramBot(token, { polling: true });
@@ -73,6 +73,7 @@ function newQuestion(msg) {
       parse_mode: 'Markdown'
     })
   };
+
   chat = msg.hasOwnProperty('chat') ? msg.chat.id : msg.from.id;
   bot.sendMessage(chat, text, options);
   if (numberAnswer < questions.length) {
@@ -96,7 +97,7 @@ bot.onText(/\/start/, function (msg, match) {
   numberAnswer = 0;
   countRightAnswer = 0;
   answerUser = [];
-  newQuestion(msg);
+  setTimeout(newQuestion.bind(this, msg), 2000);
 });
 
 bot.on('callback_query', function (msg) {
@@ -120,7 +121,7 @@ bot.on('callback_query', function (msg) {
 
 function endPoll(msg) {
   if (countRightAnswer === questions.length) {
-    bot.sendMessage(230431843, `Юзер который прошел опрос - @${msg.from.username}`);
+    bot.sendMessage(230431843, `Юзер который прошел опрос - @${msg.from.username}`); //230431843 - hokage
     bot.sendMessage(msg.from.id, "Спасибо, наш менеджер скоро с вами свяжется:)");
   } else {
     bot.sendMessage(msg.from.id, "К сожалению вы нам не подходите, попробуйте в следующий раз.")
